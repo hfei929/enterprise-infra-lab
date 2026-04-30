@@ -83,3 +83,16 @@
 - 接入持久化存储（NFS / CSI）
 - 构建监控系统（Prometheus + Grafana）
 
+---
+
+## Ingress 架构设计（第二阶段）
+
+ - 使用 Nginx Ingress Controller
+ - 部署方式：Deployment
+ - 副本数：2
+ - 暴露方式：NodePort
+ - 目的：构建基础七层入口能力
+
+### Ingress 高可用接入设计
+
+在五外部负载均衡设备环境下，引入 MetalLB 作为逻辑环境负载均衡方案，为 Ingress 提供 LoadBalancer 类型暴露能力。

@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: mysql-alert-rules
+  namespace: default   # ⚠️ 必须和你的 mysql/exporter 在同一个 namespace
+  labels:
+    release: monitoring   # ⚠️ 必须匹配 Prometheus（非常关键）
+spec:
+  groups:
+  - name: mysql.rules
+    rules:
+
+    # 🚨 1. MySQL 挂掉
+    - alert: MySQLDown
+      expr: mysql_up == 0
+      for: 30s
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL 实例不可用"
+        description: "MySQL 实例已经 down 超过 30 秒"
+
+    # ⚠️ 2. 连接数过高
+    - alert: MySQLTooManyConnections
+      expr: mysql_global_status_threads_connected > 80
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL 连接数过高"
+        description: "当前连接数超过 80"
+
+    # 🔥 3. 线程堆积（性能瓶颈）
+    - alert: MySQLHighThreadsRunning
+      expr: mysql_global_status_threads_running > 50
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL 执行线程过高"
+        description: "可能存在性能瓶颈或锁竞争"
